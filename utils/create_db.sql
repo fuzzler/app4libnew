@@ -1,0 +1,22 @@
+--CREATE DATABASE IF NOT EXISTS `app4lib` CHARACTER SET latin1; --non possibile su altervista
+
+CREATE TABLE IF NOT EXISTS urls (
+    nurl INT(10) AUTO_INCREMENT PRIMARY KEY,
+    furl TEXT(255),
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT(4) AUTO_INCREMENT PRIMARY KEY,
+    nome TEXT(50) NOT NULL,
+    cognome TEXT(50) NOT NULL,
+    email TEXT(50) NOT NULL
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS rels (
+    idrel INT(20) AUTO_INCREMENT PRIMARY KEY,
+    userid INT(10),
+    urlid INT(10),
+    FOREIGN KEY (userid) REFERENCES users(id),
+    FOREIGN KEY (urlid) REFERENCES urls(nurl)
+) ENGINE=INNODB;
+
