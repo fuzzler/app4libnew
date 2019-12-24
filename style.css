@@ -1,0 +1,36 @@
+body {
+    background-color: #E5FEA2;
+}
+
+a {
+    color: black;
+}
+
+a:visited {
+    color: black;
+}
+
+a:hover {
+    color: purple;
+}
+
+.pulsante {
+    height: 45px;
+    width: 135px;
+    background-color: green;
+    color: lightblue;
+    font-size: 25px;
+    font-weight: bolder;
+}
+
+.pulsante:hover {
+    background-color: yellow;
+    color: green;
+    cursor: pointer;
+}
+
+#ses_lat {
+    float: right;
+    text-align: right;
+    color: darkgreen;
+}

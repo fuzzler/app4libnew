@@ -1,98 +1,63 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Libri Usati - V.2.0.0 by Fuzz</title>
-
-    <script
-        src="https://code.jquery.com/jquery-3.4.1.js"
-        integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-        crossorigin="anonymous">    
-    </script>
-	
-	<style>
-	
-		body {
-			background-color: #E5FEA2;
-		}
-
-		a {
-			color: black;
-		}
-
-		a:visited {
-			color: black;
-		}
-
-		a:hover {
-			color: purple;
-		}
-	
-		.pulsante {
-			height: 45px;
-			width: 135px;
-			background-color: green;
-			color: lightblue;
-			font-size: 25px;
-			font-weight: bolder;
-		}
-
-		.pulsante:hover {
-			background-color: yellow;
-			color: green;
-			cursor: pointer;
-		}
-        
-        #ses_lat {
-        	float: right;
-        	text-align: right;
-            color: darkgreen;
-        }
-
-	</style>
-</head>
-
-<body>
 <?php
+// Controlli iniziali (login...sessione...)
+
+error_reporting(1); // per debug
+ini_set('display_errors', 2); // per il debug (potrebbe essere deprecata in php7)
+
+/*
 if(!isset($_SESSION['count'])) {
-	$_SESSION['count'] = 0;
-    ?><span id="ses_lat"> N.Ses: <?php echo count($_SESSION['count']) ?></span><?php
+	$_SESSION['count'] = 0;    
 }
+else {
+	?><span id="ses_lat"> N.Ses: <?php echo count($_SESSION['count']) ?></span><?php
+}
+*/
+
+if(isset($_SESSION['login_success'])) {
+	$utente = $_SESSION['current_user'];
+}
+else {
+	//header('Location: noauthpg.php');
+	$utente = '';
+}
+
 ?>
 
+<!--
 <h3> Chiudi Sessione Corrente </h3>
 <form action="" method="POST">
 <input type="submit" value="CHIUDI" name="EOS" class="pulsante" > 
 </form>
+-->
 
 <?php
 
+// Variabili importanti
+$pagename = "Homepage - ". NOME_APP; // Nome della pagina (richiesto nel template)
+
 // Requirements:
+require_once 'template.php';
+require_once 'conn2db.php';
+require_once 'functions.php';
+
 // *************
 
-session_start();
+?>
 
-error_reporting(1);
-ini_set('display_errors', 2);
+<h1 class="titolo">Benvenuto nella tua pagina personale <?php echo $utente ?> </h1>
 
-require_once('functions.php');
-//require_once('conn2db.php');
-
-
+<?php
 // Se è settato End Of Session
 if(isset($_POST['EOS'])) {
 	session_destroy();
-	header("Location: indexA4L.php");
+	header("Location: noauthpg.php");
 }
 
-while($_SESSION['count'] < 5) {
+// Aggiorna la pagina 4 volte (responso più attendibile / più lento <- trovare altro sistema)
+while($_SESSION['count'] < 3) {
 	// ricarico la pagina
-	header("Location: indexA4L.php");
-	$_SESSION['count']++;
-	
-	//if(count($_SESSION['count'] > 3)) $_POST = [];	
+	header("Location: index.php");
+	$_SESSION['count']++;	
 }
 
 //var_dump($_SESSION);
@@ -112,7 +77,7 @@ $color = ($n_usato > 0) ? 'green' : 'red';
 
 echo "<h3>Usati disponibili: <span style=\"color: $color ;\" >".$n_usato."</span></h3>";
 
-echo "<b><u>Titoli Usati:</u></b> <br><ul>";
+echo "<b><u>Titoli Usati in Evidenza:</u></b> <br><ul>";
 
 foreach($titoli as $titolo) {
 
@@ -122,42 +87,14 @@ foreach($titoli as $titolo) {
 echo "</ul>";
 
 
-/*
-STAMPE DI PROVA -> CANCELLABILI DEBUG
-$prova = " 12,34 ";
-$prova2 = str_replace(",",".",$prova);
 
-$prova2 = trim($prova2);
 
-if(is_numeric($prova2)) {
-    echo "<h1>$prova2 E' un cazzo di numero! </h1>";
-}
-else {
-    echo "<h1>$prova2 NON E' un cazzo di minchia di numero! </h1>";
-}
-*/
-
-// indirizzi di prova
-/*
-$urls = [
-	'sconto + ebook' => 'https://www.libraccio.it/libro/9788858135815/stefano-mancuso/nazione-delle-piante.html',
-	'usato' => 'https://www.libraccio.it/libro/9788891908216/al-kelley-ira-pohl/c-didattica-e-programmazione-ediz-mylab-con-contenuto-digitale-per-download-e-accesso-on-line.html',
-	'ebook' => 'https://www.libraccio.it/libro/9788809831360/stefano-mancuso/plant-revolution.html',
-	'ctrl' => 'https://www.libraccio.it/libro/9788833620008/jerry-richardson/introduzione-alla-pnl-come-capire-e-farsi-capire-meglio-usando-programmazione-neuro-linguistica.html',
-	'ctrl2' => 'https://www.libraccio.it/libro/9788897461784/elisa-martinez-garrido/romanzi-di-elsa-morante-scrittura-poesia-ed-etica.html',
-	'ctrl3' => 'https://www.libraccio.it/libro/9788876158377/tom-wolfe/decennio-io.html',
-	'ctrl4' => 'https://www.libraccio.it/libro/9788881184163/palladio-nel-nord-europa-libri-viaggiatori-architetti.html',
-	'ebook2' => 'https://www.libraccio.it/libro/9788868952471/justin-seitz/python-per-hacker-tecniche-offensive-black-hat.html',
-	'usato2 + ebook' => 'https://www.libraccio.it/libro/9788850333776/steve-prettyman/programmare-con-php-7.html'
-];
-*/
 
 // indirizzi di produzione (da inserire nel DB)
 
 $urls = [
 	'https://www.libraccio.it/libro/9788848140317/enrico-zimuel/sviluppare-in-php-7-realizzare-applicazioni-web-e-api-professionali.html',
     'https://www.libraccio.it/libro/9788891908254/andrew-s-tanenbaum-david-j-wetherall/reti-di-calcolatori-ediz-mylab-con-aggiornamento-online-con-ebook.html',
-	'https://www.libraccio.it/libro/9788891902542/james-f-kurose-keith-w-ross/reti-di-calcolatori-e-internet-un-approccio-top-down-ediz-mylab-con-etext-con-aggiornamento-online.html',
     'https://www.libraccio.it/libro/9788850334797/silvio-umberto-zanzi/linux-server-per-amministratore-di-rete-guida-per-sfruttare-con-successo-linux-in-azienda.html',
 	'https://www.libraccio.it/libro/9788850332267/marc-wandschneider/node-js-creare-applicazioni-web-in-javascript.html',
 	"https://www.libraccio.it/libro/9788820383022/claudio-de-sio-cesari/manuale-di-java-9-programmazione-orientata-agli-oggetti-con-java-standard-edition-9.html",
