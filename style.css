@@ -46,3 +46,9 @@ a:hover {
     font-weight: bolder;
     color: red;
 }
+
+.valid_mess {
+    text-align: center;
+    font-weight: bolder;
+    color: green;
+}
