@@ -1,39 +1,7 @@
 <?php
-// Controlli iniziali (login...sessione...)
-
-error_reporting(1); // per debug
-ini_set('display_errors', 2); // per il debug (potrebbe essere deprecata in php7)
-
-/*
-if(!isset($_SESSION['count'])) {
-	$_SESSION['count'] = 0;    
-}
-else {
-	?><span id="ses_lat"> N.Ses: <?php echo count($_SESSION['count']) ?></span><?php
-}
-*/
-
-if(isset($_SESSION['login_success'])) {
-	$utente = $_SESSION['current_user'];
-}
-else {
-	//header('Location: noauthpg.php');
-	$utente = '';
-}
-
-?>
-
-<!--
-<h3> Chiudi Sessione Corrente </h3>
-<form action="" method="POST">
-<input type="submit" value="CHIUDI" name="EOS" class="pulsante" > 
-</form>
--->
-
-<?php
 
 // Variabili importanti
-$pagename = "Homepage - ". NOME_APP; // Nome della pagina (richiesto nel template)
+$pagename = "Homepage"; // Nome della pagina (richiesto nel template)
 
 // Requirements:
 require_once 'template.php';
@@ -41,10 +9,54 @@ require_once 'conn2db.php';
 require_once 'functions.php';
 
 // *************
-
 ?>
 
-<h1 class="titolo">Benvenuto nella tua pagina personale <?php echo $utente ?> </h1>
+<body>
+<div class="container-fluid">
+
+<?php
+// Controlli iniziali (login...sessione...)
+
+//session_start();
+
+//	var_dump($_SESSION);
+
+if(isset($_SESSION['usr_data'])) {
+	$nome_utente = $_SESSION['usr_data']['nome'];
+	$nome_utente = strtolower($nome_utente);
+	$nome_utente = ucfirst($nome_utente);
+}
+else {
+	header('Location: noauthpg.php');
+}
+
+
+
+?>
+<div class="row">
+
+<div class="col-2"></div>
+
+<div class="col-8"></div>
+
+<div class="col-2">
+	<br>
+	<form action="logout.php" method="POST">
+	<input type="submit" value="LOGOUT" > 
+	</form>
+	<br>
+</div>
+
+</div> <!-- fine row -->
+
+<div class="row">
+<div class="col-2"></div>
+<div class="col-8">
+<h1 class="titolo">Benvenuto nella tua pagina personale <?php echo $nome_utente ?> </h1>
+
+
+
+
 
 <?php
 // Se è settato End Of Session
@@ -171,13 +183,26 @@ foreach($urls as $key => $url) {
 
 
 ?>
+</div> <!-- fine col-8 (main)-->
 
+<div class="col-2"></div>
+</div> <!-- fine row (main)-->
 
 <hr>
+<div class="row">
 
-<center>
-<code>Copyright 2019</code>
-</center>
+	<div class="col-5"></div>
 
+	<div class="col-2">
+
+	<code>Copyright 2019</code>
+
+	</div>
+
+	<div class="col-5"></div>
+
+</div> <!-- fine row -->
+
+
+</div> <!-- fine container -->
 </body>
-</html>
