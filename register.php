@@ -14,102 +14,105 @@ require_once 'conn2db.php';
 
 // Logiche di scrittura nel DB
 
-if(isset($_POST['usr']) && $_POST['usr'] !== ' ' && $_POST['pw'] !== ' ') {
-
-    if($_POST['pw'] !== $_POST['pw2']) {
-        $outcome = 4; // Pw non uguali
-        //header('Location: register.php');
-    }
-    else {
-        $nome = $_POST['nome'];
-        $cognome = $_POST['cognome'];
-        $email = $_POST['email'];
-        $usr = $_POST['usr'];
-        $pw = $_POST['pw'];
+if(isset($_POST['usr'])) {
     
-        // verifica che il nome utente non sia già presente nel DB
-        $query = "SELECT usr FROM my_fuzzlernet.a4l_users WHERE usr=:usr;";
+    if($_POST['usr'] !== ' ' && $_POST['pw'] !== ' ') {
 
-        $stmt = $dbo->prepare($query);
-        $stmt->bindParam(':usr', $usr);
-        $stmt->execute();
-    
-        $resp_usr = $stmt->rowCount();
-
-        if($resp_usr > 0) {
-            //die("gia presente"); // username gia esistente
-            $outcome = 5;
+        if($_POST['pw'] !== $_POST['pw2']) {
+            $outcome = 4; // Pw non uguali
+            //header('Location: register.php');
         }
         else {
-            $stmt = null;
-            //die("disponibile"); // username gia esistente
-            $query = "INSERT INTO my_fuzzlernet.a4l_users (nome,cognome,email,usr,pw) VALUES (?, ?, ?, ?, PASSWORD(?));";
+            $nome = $_POST['nome'];
+            $cognome = $_POST['cognome'];
+            $email = $_POST['email'];
+            $usr = $_POST['usr'];
+            $pw = $_POST['pw'];
         
-            // Statement
-            try {
-                $stmt = $dbo->prepare($query);
-                $stmt->execute([$nome, $cognome, $email, $usr, $pw]); // esecuzione diretta (no bind)
+            // verifica che il nome utente non sia già presente nel DB
+            $query = "SELECT usr FROM my_fuzzlernet.a4l_users WHERE usr=:usr;";
+
+            $stmt = $dbo->prepare($query);
+            $stmt->bindParam(':usr', $usr);
+            $stmt->execute();
         
-                //var_dump($stmt->errorInfo());
-                $response = $stmt->rowCount(); // conta le righe ritornate dal DB (esito)
-        
-            }
-            catch(PDOException $e) {
-                throw new MyDatabaseException( $e->getMessage( ) , $e->getCode( ) );
-                echo "ERRORE! => ";
-                var_dump($e->getMessage());
-                //die("fine programma");
-            }
-            
-            //echo "Conto righe: ".$response; //die; // stampa di debug
-        
-            if($response > 0) {                
+            $resp_usr = $stmt->rowCount();
 
-                $stmt = null; // chiudo lo statement
-
-                //Estraggo i dati dell'utente appena inserito
-                $query = "SELECT * FROM my_fuzzlernet.a4l_users WHERE usr=:usr;";
-
-                $stmt = $dbo->prepare($query);
-                $stmt->bindParam(':usr', $usr);
-                $stmt->execute();
-            
-                $resp_usrdata = $stmt->rowCount();
-
-                if($resp_usrdata > 0) {
-
-                    // Estraggo i dati dal DB
-                    $usrdata = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-                    $_SESSION['usr_data']['usrid'] = $usrdata['id'];
-                    $_SESSION['usr_data']['nome'] = $usrdata['nome'];
-                    $_SESSION['usr_data']['cognome'] = $usrdata['cognome'];
-                    $_SESSION['usr_data']['email'] = $usrdata['email'];
-                    $_SESSION['usr_data']['username'] = $usrdata['usr'];
-                    //$_SESSION['usr_data']['password'] = $usrdata['pw'];
-
-                    $outcome = 1; // esito positivo -> dati scritti nel DB
-            
-                    //var_dump($_SESSION); die;
-                }
-                else {
-                    $outcome = 6; // dati utente irraggiungibili -> login.php
-                }           
-
+            if($resp_usr > 0) {
+                //die("gia presente"); // username gia esistente
+                $outcome = 5;
             }
             else {
-                $outcome = 2; // esito negativo -> errore nella scrittura del DB
-            }
-        }    
-        
-    } // fine else pw =
+                $stmt = null;
+                //die("disponibile"); // username gia esistente
+                $query = "INSERT INTO my_fuzzlernet.a4l_users (nome,cognome,email,usr,pw) VALUES (?, ?, ?, ?, PASSWORD(?));";
+            
+                // Statement
+                try {
+                    $stmt = $dbo->prepare($query);
+                    $stmt->execute([$nome, $cognome, $email, $usr, $pw]); // esecuzione diretta (no bind)
+            
+                    //var_dump($stmt->errorInfo());
+                    $response = $stmt->rowCount(); // conta le righe ritornate dal DB (esito)
+            
+                }
+                catch(PDOException $e) {
+                    throw new MyDatabaseException( $e->getMessage( ) , $e->getCode( ) );
+                    echo "ERRORE! => ";
+                    var_dump($e->getMessage());
+                    //die("fine programma");
+                }
+                
+                //echo "Conto righe: ".$response; //die; // stampa di debug
+            
+                if($response > 0) {                
+
+                    $stmt = null; // chiudo lo statement
+
+                    //Estraggo i dati dell'utente appena inserito
+                    $query = "SELECT * FROM my_fuzzlernet.a4l_users WHERE usr=:usr;";
+
+                    $stmt = $dbo->prepare($query);
+                    $stmt->bindParam(':usr', $usr);
+                    $stmt->execute();
+                
+                    $resp_usrdata = $stmt->rowCount();
+
+                    if($resp_usrdata > 0) {
+
+                        // Estraggo i dati dal DB
+                        $usrdata = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                        $_SESSION['usr_data']['usrid'] = $usrdata['id'];
+                        $_SESSION['usr_data']['nome'] = $usrdata['nome'];
+                        $_SESSION['usr_data']['cognome'] = $usrdata['cognome'];
+                        $_SESSION['usr_data']['email'] = $usrdata['email'];
+                        $_SESSION['usr_data']['username'] = $usrdata['usr'];
+                        //$_SESSION['usr_data']['password'] = $usrdata['pw'];
+
+                        $outcome = 1; // esito positivo -> dati scritti nel DB
+                
+                        //var_dump($_SESSION); die;
+                    }
+                    else {
+                        $outcome = 6; // dati utente irraggiungibili -> login.php
+                    }           
+
+                }
+                else {
+                    $outcome = 2; // esito negativo -> errore nella scrittura del DB
+                }
+            }    
+            
+        } // fine else pw =
 
     //echo "<pre>"; var_dump($usrdata); echo "</pre>"; // stampa di debug
 
-} // fine if controllo usr e pw ' '
-else {
-    $outcome = 3; // username o password errati (spazio vuoto)
-}
+    } // fine if controllo usr e pw ' '
+    else {
+        $outcome = 3; // username o password errati (spazio vuoto)
+    }
+} // fine if $_POST
 
 
 
