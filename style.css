@@ -41,6 +41,15 @@ a:hover {
     font-size: 50;
 }
 
+.txtcenter {
+    text-align: center;
+    
+}
+
+.txtbolder {
+    font-weight: bolder;
+}
+
 .err_mess {
     text-align: center;
     font-weight: bolder;
@@ -51,4 +60,8 @@ a:hover {
     text-align: center;
     font-weight: bolder;
     color: green;
+}
+
+.link {
+    text-decoration: underline;
 }
