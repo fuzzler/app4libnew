@@ -177,14 +177,14 @@ else {
 			<tr>
 				<th>
 				<form action="modify.php" method="POST">
-					<input type="hidden" name="id" value="<?php echo $url['nurl'] ?>">
+					<input type="hidden" name="urlid" value="<?php echo $url['nurl'] ?>">
 					<input type="submit" value="Modifica">
 				</form>
 				</th>
 
 				<th>
 				<form action="delete.php" method="POST">
-					<input type="hidden" name="id" value="<?php echo $url['nurl'] ?>">
+					<input type="hidden" name="urlid" value="<?php echo $url['nurl'] ?>">
 					<input type="submit" value="Elimina">
 				</form>
 				</th>

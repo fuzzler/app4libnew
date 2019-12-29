@@ -65,3 +65,13 @@ a:hover {
 .link {
     text-decoration: underline;
 }
+
+.tabella {
+    float: center;
+    margin: 0 auto;
+}
+
+.longfield {
+    width: 500;
+
+}
