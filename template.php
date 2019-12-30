@@ -35,7 +35,7 @@ ini_set('display_errors', 2); // per il debug (potrebbe essere deprecata in php7
 	<link rel="stylesheet" href="style.css">
 	
 	<style>
-    
+        
 	</style>
     
 </head>

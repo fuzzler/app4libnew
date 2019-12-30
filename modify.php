@@ -76,7 +76,7 @@ else {
     if($stmt->rowCount() > 0) {
         ?> <span class="valid_mess">Modifica effettuata con successo!!!</span><br> 
         Verrai reindirizzato alla tua pagina personale in pochi secondi ...<?php
-        header("Refresh: 3, url=index.php");
+        header("Refresh: 2, url=index.php");
     }
     else {
         ?> <span class="err_mess">Non è stato possibile effettuare la modifica!!!</span><br> 

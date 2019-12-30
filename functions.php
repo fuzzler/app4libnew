@@ -6,7 +6,7 @@ error_reporting(1);
 
 // funzione che esamina il testo della pagina
 
-function findOccurrence(string $url) :array {
+function findOccurrence(string $url, $id) :array {
 
     $findPrezzo = "'productcover_price'"; // => per cercare prezzo di copertina
     $findSconto = "'productdiscount_price'"; // => per cercare prezzo scontato
@@ -19,7 +19,9 @@ function findOccurrence(string $url) :array {
         'prezzo' => '',
         'sconto' => '',
         'usato' => '',
-        'ebook' => ''
+        'ebook' => '',
+        'url' => $url,
+        'id' => $id
     ];
 
     $text = file_get_contents($url);
@@ -141,10 +143,71 @@ function findOccurrence(string $url) :array {
     else {
         $return['ebook'] = false; // inserire una stringa più indicativa
     }
-
-
-
-
     return $return;
 
 } // fine findOccurrence()
+
+
+function stampaRisultati($key,$result) {
+
+    echo "<hr>";
+
+    $style = '';
+    
+    // stampa titolo in produzione
+	echo "<h1>".($key+1).') <a href="'.$result['url'].'" target="_blank">'.ucfirst($result['titolo'])."</a></h1>";
+
+	//echo "<pre>"; var_dump($result); echo "</pre>";
+
+	// Listato
+	foreach($result as $k => $v) {
+		
+		if($v === true || $v !== '') {
+			if($v === true) 
+				$v = 'Disponibile';
+
+			$style = "font-weight: bold; color: green;";
+		}
+
+		if($v === false || $v === '') {
+			$v = 'NON disponibile';
+			$style = 'color: red; font-weight: bolder;';
+		}
+
+		if(strtolower($k) === 'usato') {
+
+			$style .= 'background-color: yellow';
+        }
+        
+        // stampa tutto tranne url e id (servono solo alle funzioni)
+        if(strtolower($k) !== 'url' && strtolower($k) !== 'id') {
+            echo ucfirst($k) . ': <span style="'.$style.'">'. $v .'</span> <br>';			
+        }
+		
+		
+	} 
+
+	// menu
+?>
+    <br>
+	<table>
+		<tr>
+			<th>
+			<form action="modify.php" method="POST">
+				<input type="hidden" name="urlid" value="<?php echo $result['id'] ?>">
+				<input type="submit" value="Modifica">
+			</form>
+			</th>
+
+			<th>
+			<form action="delete.php" method="POST">
+				<input type="hidden" name="urlid" value="<?php echo $result['id'] ?>">
+				<input type="submit" value="Elimina">
+			</form>
+			</th>
+			
+        </tr>
+    </table>
+<?php
+
+} // fine stampaRisultati

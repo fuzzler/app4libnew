@@ -67,7 +67,7 @@ else {
 <div class="col-2">
 	<br>
 	<form action="logout.php" method="POST">
-	<input type="submit" value="LOGOUT" > 
+	<input class="floatr" type="submit" value="LOGOUT" > 
 	</form>
 	<br>
 </div>
@@ -77,7 +77,7 @@ else {
 <div class="row">
 <div class="col-2"></div>
 <div class="col-8">
-<h1 class="titolo">Benvenuto nella tua pagina personale <?php echo $nome_utente ?> </h1>
+<h1 class="titolog">Benvenuto nella tua pagina personale <?php echo $nome_utente ?> </h1>
 
 <?php
 
@@ -125,82 +125,74 @@ else {
 
 	foreach($titoli as $titolo) {
 
-		echo '<li><a href="'.current($titolo).'" target="_blank">'.key($titolo).' </li>';
+		echo '<li><a href="'.current($titolo).'" target="_blank">'.key($titolo).' </a></li>';
 	}
 
 	echo "</ul>";
 	
 	foreach($urls as $key => $url) {
 
-		echo "<hr>";
-
-		$style = '';
-
-
-
-		$result = findOccurrence($url['furl']);
 		
-		// stampa titolo in produzione
-		echo "<h1>".($key+1).') <a href="'.$url.'" target="_blank">'.ucfirst($result['titolo'])."</a></h1>";
+		//var_dump($url);
 
-		$n_usato = $result['n_usato'];
-
-		//echo "<pre>"; var_dump($result); echo "</pre>";
-
-		// Listato
-		foreach($result as $k => $v) {
-			
-			if($v === true || $v !== '') {
-				if($v === true) 
-					$v = 'Disponibile';
-
-				$style = "font-weight: bold; color: green;";
-			}
-
-			if($v === false || $v === '') {
-				$v = 'NON disponibile';
-				$style = 'color: red; font-weight: bolder;';
-			}
-
-			if(strtolower($k) === 'usato') {
-
-				$style .= 'background-color: yellow';
-			}
-			
-			echo ucfirst($k) . ': <span style="'.$style.'">'. $v .'</span> <br>';
-		} 
-
-		// menu
-		?>
-
-		<table>
-			<tr>
-				<th>
-				<form action="modify.php" method="POST">
-					<input type="hidden" name="urlid" value="<?php echo $url['nurl'] ?>">
-					<input type="submit" value="Modifica">
-				</form>
-				</th>
-
-				<th>
-				<form action="delete.php" method="POST">
-					<input type="hidden" name="urlid" value="<?php echo $url['nurl'] ?>">
-					<input type="submit" value="Elimina">
-				</form>
-				</th>
-				
-  			</tr>
-		</table>
+		if($url['cat'] == 'normal') {
+			//echo $url['nurl'].") entrato in normak<br>";
+			$resultNormal[] = findOccurrence($url['furl'],$url['nurl']);
+		}
+		if($url['cat'] == 'prior') {
+			//echo $url['nurl'].") entrato in prior<br>";
+			$resultPrior[] = findOccurrence($url['furl'],$url['nurl']);
+		}
+		if($url['cat'] == 'curios') {
+			//echo $url['nurl'].") entrato in curios<br>";
+			$resultCurios[] = findOccurrence($url['furl'],$url['nurl']);
+		}
+		if($url['cat'] == 'personal') {
+			//echo $url['nurl'].") entrato in pers<br>";
+			$resultPersonal[] = findOccurrence($url['furl'],$url['nurl']);
+		}
 		
-
-		
-
-		<?php
 	} // fine foreach urls
 } // fine else (no url)
 
+//var_dump($resultPrior);
+// Stampa dei Risultati
+
+if(count($resultPrior) > 0) {
+	echo "<h1 class=\"titolo\">§ *** PRIORITARI (".count($resultPrior).") *** §</h1>";
+}
+
+//Stampa dei prioritari
+foreach($resultPrior as $key => $result) {
+	//var_dump($result);
+	stampaRisultati($key,$result);
+} // fine foreach
+
+
+if(count($resultNormal) > 0) {
+	echo "<h1 class=\"titolo\">§ *** ORDINARI (".count($resultNormal).") *** §</h1>";
+}
+
+//Stampa dei Normali
+foreach($resultNormal as $key => $result) {
+	//var_dump($result);
+	stampaRisultati($key,$result);
+} // fine foreach
+
+
+if(count($resultCurios) > 0) {
+	echo "<h1 class=\"titolo\">§ *** CURIOSITA' (".count($resultCurios).") *** §</h1>";
+}
+
+//Stampa dei Curios
+foreach($resultCurios as $key => $result) {
+	//var_dump($result);
+	stampaRisultati($key,$result);
+} // fine foreach
+
 
 ?>
+
 </div> <!-- fine col-8 (main)-->
 
 <div class="col-2"></div>
