@@ -4,9 +4,11 @@ session_start();
 
 error_reporting(1);
 
+require_once 'conn2db.php';
+
 // funzione che esamina il testo della pagina
 
-function findOccurrence(string $url, $id) :array {
+function findOccurrence(string $url, $id, $cat) :array {
 
     $findPrezzo = "'productcover_price'"; // => per cercare prezzo di copertina
     $findSconto = "'productdiscount_price'"; // => per cercare prezzo scontato
@@ -21,7 +23,8 @@ function findOccurrence(string $url, $id) :array {
         'usato' => '',
         'ebook' => '',
         'url' => $url,
-        'id' => $id
+        'id' => $id,
+        'cat' => $cat
     ];
 
     $text = file_get_contents($url);
@@ -195,6 +198,8 @@ function stampaRisultati($key,$result) {
 			<th>
 			<form action="modify.php" method="POST">
 				<input type="hidden" name="urlid" value="<?php echo $result['id'] ?>">
+                <input type="hidden" name="titolo" value="<?php echo $result['titolo'] ?>">
+                <input type="hidden" name="cat" value="<?php echo $result['cat'] ?>">
 				<input type="submit" value="Modifica">
 			</form>
 			</th>

@@ -32,7 +32,10 @@ if(isset($_SESSION['usr_data'])) {
 
 	$userid = $_SESSION['usr_data']['usrid'];
 
-	$query = "SELECT nurl,furl,cat	 FROM `a4l_urls` as u JOIN `a4l_rels`as r ON u.nurl = r.urlid WHERE userid=:userid;";
+
+	$query = "SELECT u.nurl,u.furl,r.cat FROM `a4l_urls` as u JOIN `a4l_rels`as r ON u.nurl = r.urlid WHERE userid=:userid;";
+	// vecchia query:
+	//"SELECT * FROM `a4l_urls` as u JOIN `a4l_rels`as r ON u.nurl = r.urlid WHERE userid=:userid;";
 
 	$stmt = $dbo->prepare($query);
 	$stmt->bindParam(':userid',$userid);
@@ -42,7 +45,7 @@ if(isset($_SESSION['usr_data'])) {
 		//$urls = $stmt->fetchAll();
 		$urls = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-		//echo "<pre>"; var_dump($extract); die;
+		//echo "<pre>"; var_dump($urls); die;
 
 		//foreach($extract as $u) { $urls[] = $u['furl'];	}
 	}
@@ -77,7 +80,8 @@ else {
 <div class="row">
 <div class="col-2"></div>
 <div class="col-8">
-<h1 class="titolog">Benvenuto nella tua pagina personale <?php echo $nome_utente ?> </h1>
+	
+	<h1 class="titolog">Benvenuto nella tua pagina personale <?php echo $nome_utente ?> </h1>
 
 <?php
 
@@ -90,11 +94,26 @@ if(empty($urls) || count($urls) === 0) {
 		*** Non hai ancora inserito alcun Url da monitorare  ***
 	</span><br><br>
 	<span class="txtcenter">
-		Inseriscine uno da <a class="link" href="insert.php">QUI</a>
+		Inseriscine uno Cliccando sul pulsante qui sotto<br><br>
+		<form action="insert.php" method="POST">                  
+			<input type="hidden" name="userid" value="<?php echo $userid ?>">
+			<input type="submit" name="INS" value="Inserisci" class="pulsante">
+		</form>
 	</span><br><hr>
+
+
 	<?php
 }
 else {
+	?>
+	</div> <!-- fine col-8 (titolo/main)-->
+	<div class="col-2"></div>
+</div> <!-- fine row (titolo/main)-->
+<br><br>
+<div class="row"> <!-- fine row (middle)-->
+	<div class="col-2"></div>
+	<div class="col-5">
+	<?php
 
 	// Aggiorna la pagina piu volte (responso più attendibile / più lento <- trovare altro sistema)
 	while($_SESSION['count'] < 2) {
@@ -118,17 +137,42 @@ else {
 
 	//$color = 'blue';
 	$color = ($n_usato > 0) ? 'green' : 'red';
-
+	
+	
 	echo "<h3>Usati disponibili: <span style=\"color: $color ;\" >".$n_usato."</span></h3>";
 
-	echo "<b><u>Titoli Usati in Evidenza:</u></b> <br><ul>";
+	if($n_usato > 0) {
+		echo "<b><u>Titoli Usati in Evidenza:</u></b> <br><ul>";
 
-	foreach($titoli as $titolo) {
+		foreach($titoli as $titolo) {
+			echo '<li><a href="'.current($titolo).'" target="_blank">'.key($titolo).' </a></li>';
+		}
 
-		echo '<li><a href="'.current($titolo).'" target="_blank">'.key($titolo).' </a></li>';
+		echo "</ul>";
 	}
+	
+	?>
+	
+	</div>
+	<div style="border-left:1px solid grey;height: auto"></div>
+	<div class="col-3 txtcenter"> <!-- spazio insert-->
 
-	echo "</ul>";
+		<span class="txtbolder">Inserisci un URL valido da salvare</span>
+		<form action="insert.php" method="POST">                  
+			<input type="hidden" name="userid" value="<?php echo $userid ?>">
+			<input type="submit" name="INS" value="Inserisci" class="pulsante">
+		</form>
+	</div>
+	<div class="col-2"></div>
+	
+</div> <!-- fine row middle-->
+<br><br>
+<div class="row"> <!-- fine row alt main-->
+
+	<div class="col-2"></div>
+	<div class="col-8">
+	<?php
+	
 	
 	foreach($urls as $key => $url) {
 
@@ -137,19 +181,19 @@ else {
 
 		if($url['cat'] == 'normal') {
 			//echo $url['nurl'].") entrato in normak<br>";
-			$resultNormal[] = findOccurrence($url['furl'],$url['nurl']);
+			$resultNormal[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
 		}
 		if($url['cat'] == 'prior') {
 			//echo $url['nurl'].") entrato in prior<br>";
-			$resultPrior[] = findOccurrence($url['furl'],$url['nurl']);
+			$resultPrior[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
 		}
 		if($url['cat'] == 'curios') {
 			//echo $url['nurl'].") entrato in curios<br>";
-			$resultCurios[] = findOccurrence($url['furl'],$url['nurl']);
+			$resultCurios[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
 		}
 		if($url['cat'] == 'personal') {
 			//echo $url['nurl'].") entrato in pers<br>";
-			$resultPersonal[] = findOccurrence($url['furl'],$url['nurl']);
+			$resultPersonal[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
 		}
 		
 	} // fine foreach urls
@@ -193,9 +237,9 @@ foreach($resultCurios as $key => $result) {
 
 ?>
 
-</div> <!-- fine col-8 (main)-->
+	</div> <!-- fine col-8 (main)-->
 
-<div class="col-2"></div>
+	<div class="col-2"></div>
 </div> <!-- fine row (main)-->
 
 <hr>
@@ -205,7 +249,7 @@ foreach($resultCurios as $key => $result) {
 
 	<div class="col-2">
 
-	<code>Copyright 2019</code>
+	<code>A Fuzzler Prouduction</code>
 
 	</div>
 
