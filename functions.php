@@ -183,7 +183,7 @@ function stampaRisultati($key,$result) {
         }
         
         // stampa tutto tranne url e id (servono solo alle funzioni)
-        if(strtolower($k) !== 'url' && strtolower($k) !== 'id') {
+        if(strtolower($k) !== 'url' && strtolower($k) !== 'id' && strtolower($k) !== 'cat') {
             echo ucfirst($k) . ': <span style="'.$style.'">'. $v .'</span> <br>';			
         }
 		
@@ -207,12 +207,45 @@ function stampaRisultati($key,$result) {
 			<th>
 			<form action="delete.php" method="POST">
 				<input type="hidden" name="urlid" value="<?php echo $result['id'] ?>">
+                <input type="hidden" name="titolo" value="<?php echo $result['titolo'] ?>">
+                <input type="hidden" name="cat" value="<?php echo $result['cat'] ?>">
 				<input type="submit" value="Elimina">
 			</form>
 			</th>
 			
         </tr>
     </table>
+    
 <?php
+//var_dump($result);
 
 } // fine stampaRisultati
+
+
+function updateUrlsTable($dbo,$furl) {
+
+    $query = "INSERT INTO my_fuzzlernet.a4l_urls (furl) VALUES(?)";
+    $stmt = $dbo->prepare($query);
+    $stmt->execute([$furl]);
+
+    if($stmt->rowCount() > 0) {
+        return true;
+    }
+    else {
+        return $stmt->errorInfo();
+    }
+} // fine function updateURLS
+
+function updateRelsTable($dbo,$urlid,$userid,$cat) {
+
+    $query = "INSERT INTO my_fuzzlernet.a4l_rels (userid,urlid,cat) VALUES(?,?,?)";
+    $stmt = $dbo->prepare($query);
+    $stmt->execute([$userid,$urlid,$cat]);
+
+    if($stmt->rowCount() > 0) {
+        return true;
+    }
+    else {
+        return $stmt->errorInfo();
+    }
+} // fine function updateRELS

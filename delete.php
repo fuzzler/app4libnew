@@ -7,15 +7,21 @@ require_once 'conn2db.php';
 // *************
 
 // Controllo che esista ID dell'Url (nurl/urlid)
-if(isset($_POST['urlid'])) {
+if(isset($_POST['urlid']) && isset($_POST['titolo']) && isset($_POST['cat'])) {
     $urlid = $_POST['urlid'];
+    $titolo = $_POST['titolo'];
+    $cat = $_POST['cat'];
 }
 else if(isset($_SESSION['tmp_urlid_2d'])) {
     $urlid = $_SESSION['tmp_urlid_2d'];
+    $titolo = $_SESSION['tmp_titolo'];
+    $cat = $_SESSION['tmp_cat'];
 }
 else {
     header('Location: index.php');
 }
+
+//var_dump($_POST);
 
 ?>
 <div class="container-fluid">
@@ -25,6 +31,7 @@ else {
             <h2 class="titolo">Eliminazione dell'Url salvato (<?= $urlid ?>)</h2>
 <?php
 
+/*
 $query = "SELECT * FROM my_fuzzlernet.a4l_urls WHERE nurl=?";
 
 $stmt = $dbo->prepare($query);
@@ -38,17 +45,22 @@ foreach($urldata as $ud) {
     $cat = $ud['cat'];
 }
 
-// salvo in sessione il N° Url nel caso possa servire...
-$_SESSION['tmp_urlid_2d'] = $nurl;
-
 $stmt = null;
+*/
+
+// salvo in sessione il N° Url nel caso possa servire...
+$_SESSION['tmp_urlid_2d'] = $urlid;
+$_SESSION['tmp_titolo'] = $titolo;
+$_SESSION['tmp_cat'] = $cat;
+
+
 //echo "$nurl => $furl => $cat";//var_dump($urldata);
 
 if(!isset($_POST['DEL'])) {
 ?> 
                 <br><br>
                 <h3 class="txtbolder">Vuoi davvero cancellare</h3>
-                <b><u><?=$furl ?></u></b>
+                <b><u><?=$titolo ?></u></b>
                 <br>
                 <h1>?</h1>
                 <div class="form-group">
@@ -63,25 +75,24 @@ if(!isset($_POST['DEL'])) {
 } // fine if isset post->del
 else {
     //var_dump($nurl);var_dump($_POST);die;
+    //echo "urlid: $urlid userid: $userid cat: $cat<br><br>";
 
-    $ursid = $_SESSION['usr_data']['usrid'];
+    $userid = $_SESSION['usr_data']['usrid'];
 
-    $query = "DELETE FROM my_fuzzlernet.a4l_rels WHERE urlid = ? AND userid = ?";
+    $query = "DELETE FROM my_fuzzlernet.a4l_rels WHERE urlid = ? AND userid = ? AND cat = ? LIMIT 1"; //elimina la prima occorrenza (non tutte in caso di duplicati)
 
     $stmt = $dbo->prepare($query);
-    $stmt->execute([$nurl,$ursid]);
+    $stmt->execute([$urlid,$userid,$cat]);
 
     if($stmt->rowCount() > 0) {
         echo "<span class=\"valid_mess\">URL cancellato con successo!!!</span><br>";
         echo "Verrai reindirizzato alla tua pagina personale in pochi secondi ...";
-        header("Refresh: 3, url=index.php");
+        header("Refresh: 2, url=index.php");
     }
     else {
         echo "<span class=\"err_mess\">Non è stato possibile cancellare l'URL indicato!!!</span><br>";
         echo "Prova a ripetere la procedura...";
-        //echo $stmt->errorCode();
-        //$resp = $stmt->errorInfo();
-        //echo "<br>RespMSG:<br>";var_dump($resp);
+        //echo $resp = $stmt->errorInfo(); echo "<br>RespMSG:<br>";var_dump($resp);die;
         header("Refresh: 3, url=index.php");
     }
 
