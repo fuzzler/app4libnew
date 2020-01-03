@@ -50,8 +50,15 @@ if(isset($_POST['ver'])) {
     $furl = $_POST['furl'];
     $cat = $_POST['cat'];
 
-    // Controllo che l'url sia valido!
+    $errMess = '<div class="txtcenter"><span class="err_mess">
+    Proedura di inserimento fallita!!! Provare a ripeterla!</span></div><br>';
 
+    $succMess = '<div class="txtcenter"><span class="valid_mess">
+    URL Inserito correttamente trai i tuoi personali!</span>
+    <br><span>Verrai reindirizzato alla pagina principale in pochi secondi...</span>
+    </div>';
+
+    // Controllo che l'url sia valido!
     $rootUrl = 'https://www.libraccio.it/libro/';
 
     if(strpos($furl,$rootUrl) !== false) {        
@@ -62,26 +69,21 @@ if(isset($_POST['ver'])) {
         $stmt->execute([$furl]);
 
         if($stmt->rowCount() > 0) {
+            // url presente nel DB -> aggiornamento di RELS
             $fetch = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $urlid = $fetch[0]['nurl'];
-            //echo "ID: $urlid - CAT: $cat USERID: $userid <br><br>";// var_dump($fetch); die;
+            //echo "ID: $urlid - CAT: $cat USERID: $userid <br><br>"; var_dump($fetch); die;
             
             $resp_urt = updateRelsTable($dbo,$urlid,$userid,$cat); // Aggiorna direttamente RELS
 
             if($resp_urt === true) {
                 // tabella Rels Aggiornata correttamente (FINE)
-                ?> <div class="txtcenter"><span class="valid_mess">
-                URL Inserito correttamente trai i tuoi personali!</span>
-                <br>Verrai reindirizzato alla pagina principale in pochi secondi...
-                </div><?php
+                echo $succMess;
                 header("Refresh: 2, url=index.php");
             }
             else {
                 // tabella Rels non aggiornata ...
-                ?> <div class="txtcenter">
-                <span class="err_mess">
-                Tabella RELS NON Aggiornata: Ripetere la procedura!
-                </span></div><br><?php
+                echo $errMess;
                 var_dump($resp_urt);
                 header("Refresh: 2, url=insert.php");
             }
@@ -90,33 +92,32 @@ if(isset($_POST['ver'])) {
             // url non prensente nel DB
             $resp_uut = updateUrlsTable($dbo,$furl); // Prima di aggiornare RELS occorre inserire l'url dentro URLS
 
-            if($resp_uut === true) {
-                // tabella url aggiornata...procedo ad aggiornare la tabella rels
+            $query = "SELECT nurl FROM my_fuzzlernet.a4l_urls WHERE furl=?";
+            $stmt = $dbo->prepare($query);
+            $stmt->execute([$furl]);
+
+            $fetch = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $urlid = $fetch[0]['nurl'];
+            //var_dump($urlid); die;
+
+            if($resp_uut === true) {                                
+                //die("entrato in uut");
+
                 $resp_urt = updateRelsTable($dbo,$urlid,$userid,$cat);
 
                 if($resp_urt === true) {
                     // tabella Rels Aggiornata correttamente (FINE)
-                    ?> <div class="txtcenter">
-                    <span class="valid_mess">URL Inserito correttamente trai i tuoi personali!
-                    </span> </div>
-                    <br>Verrai reindirizzato alla pagina principale in pochi secondi...<?php
+                    echo $succMess;
                     header("Refresh: 2, url=index.php");
                 }
                 else {
                     // tabella Rels non aggiornata ...
-                    ?> <div class="txtcenter"><span class="err_mess">
-                    Tabella RELS NON Aggiornata (DOPO Aggiornamento di URL)
-                    : Ripetere la procedura!</span></div><br><?php
-                    var_dump($resp_urt);
+                    echo $errMess;
                     header("Refresh: 2, url=insert.php");
-                }
-
+                }                
             }
             else {
-                // qualcosa è andato storto nell'aggiornamento di Urls
-                ?> <div class="txtcenter"><span class="err_mess">
-                Tabella URL NON Aggiornata: impossibile proseguire!
-                </div></span><br><?php
+                echo $errMess;
                 var_dump($resp_uut);
                 header("Refresh: 2, url=insert.php");
             }

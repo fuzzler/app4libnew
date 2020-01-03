@@ -1,5 +1,4 @@
 <?php
-
 // Variabili importanti
 $pagename = "Homepage"; // Nome della pagina (richiesto nel template)
 
@@ -116,7 +115,7 @@ else {
 	<?php
 
 	// Aggiorna la pagina piu volte (responso più attendibile / più lento <- trovare altro sistema)
-	while($_SESSION['count'] < 2) {
+	while($_SESSION['count'] < 3) {
 		// ricarico la pagina
 		header("Location: index.php");
 		$_SESSION['count']++;	

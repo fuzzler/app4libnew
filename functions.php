@@ -4,7 +4,7 @@ session_start();
 
 error_reporting(1);
 
-require_once 'conn2db.php';
+//require_once 'conn2db.php';
 
 // funzione che esamina il testo della pagina
 
@@ -228,7 +228,7 @@ function updateUrlsTable($dbo,$furl) {
     $stmt = $dbo->prepare($query);
     $stmt->execute([$furl]);
 
-    if($stmt->rowCount() > 0) {
+    if($stmt->rowCount() > 0) {               
         return true;
     }
     else {
@@ -236,13 +236,15 @@ function updateUrlsTable($dbo,$furl) {
     }
 } // fine function updateURLS
 
-function updateRelsTable($dbo,$urlid,$userid,$cat) {
 
+function updateRelsTable($dbo,$urlid,$userid,$cat) {
+    //die("entrato in update rels t");
     $query = "INSERT INTO my_fuzzlernet.a4l_rels (userid,urlid,cat) VALUES(?,?,?)";
     $stmt = $dbo->prepare($query);
     $stmt->execute([$userid,$urlid,$cat]);
 
     if($stmt->rowCount() > 0) {
+        //die("update rels ha funzionato!");
         return true;
     }
     else {
