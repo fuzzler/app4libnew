@@ -8,7 +8,7 @@ error_reporting(1);
 
 // funzione che esamina il testo della pagina
 
-function findOccurrence(string $url, $id, $cat) :array {
+function findOccurrence(string $url, $id, $cat, $dbo) :array {
 
     $findPrezzo = "'productcover_price'"; // => per cercare prezzo di copertina
     $findSconto = "'productdiscount_price'"; // => per cercare prezzo scontato
@@ -37,6 +37,11 @@ function findOccurrence(string $url, $id, $cat) :array {
     // ##################################################################################################
     // TROVA TITOLO
     $return['titolo'] = strstr($text,' - ',true);
+
+    // Scrive Titolo nel DB
+    $query = "UPDATE my_fuzzlernet.a4l_urls SET titolo = ? WHERE nurl = ?;";
+    $stmt = $dbo->prepare($query);
+    $stmt->execute([$return['titolo'], $id]);
 
 
     // ##################################################################################################
@@ -107,9 +112,16 @@ function findOccurrence(string $url, $id, $cat) :array {
         $return['usato'] = str_replace(".", ',', $return['usato']);
         $return['usato'] = trim($return['usato']);
         $return['usato'] .= '€';
-		$_SESSION['titoli'][] = [ $return['titolo'] => $url ];
+        $_SESSION['titoli'][] = [ $return['titolo'] => $url ];
+        
+        //Aggiornamento nel DB (valore campo 'usato' settato a 1)
+        $usatoVal = 1;
+        setUsato($id, $usatoVal, $dbo);
+
     }
     else {
+        $usatoVal = 0;
+        setUsato($id, $usatoVal, $dbo);
         $return['usato'] = ''; // inserire una stringa più indicativa
     }
 
@@ -251,3 +263,60 @@ function updateRelsTable($dbo,$urlid,$userid,$cat) {
         return $stmt->errorInfo();
     }
 } // fine function updateRELS
+
+
+function setUsato($id, $usatoVal, $dbo) {
+    // Controllo se c'è già un valore settato e se c'è aggiorno altrimenti inserisco...
+    $query = "SELECT * FROM my_fuzzlernet.a4l_used WHERE urlid = ?;"; 
+    $stmt = $dbo->prepare($query);
+    $stmt->execute([$id]);
+
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $response = $stmt->rowCount();
+    $stmt = null; //resetto lo statement
+    //echo "USATO:".$data[0]['usato']."<br>br>";var_dump($data); die;
+
+    if($response > 0) {
+        // la riga esiste -> aggiorno
+        //$query = "UPDATE my_fuzzlernet.a4l_used SET usato = :us WHERE urlid = :ur;";
+
+        // Controllo che il parametro non sia lo stesso
+        if($data[0]['usato'] != $usatoVal) {
+            $query = "UPDATE my_fuzzlernet.a4l_used SET usato = ? WHERE urlid = ?;";
+        }
+        else {
+            $query = '';
+        }
+        
+        //$stmt = $dbo->prepare($query);
+        //$stmt->execute([$usatoVal,$id]);
+    }
+    else {
+        // inserisco nuovo valore
+        //$query = "INSERT INTO my_fuzzlernet.a4l_used (urlid,usato) VALUES(:ur,:us)";
+        $query = "INSERT INTO my_fuzzlernet.a4l_used (usato,urlid) VALUES(?,?);";
+        //$stmt = $dbo->prepare($query);
+        //$stmt->execute([$id,$usatoVal]);
+    }
+    
+    if($query !== '') {
+        $stmt = $dbo->prepare($query);
+        $stmt->execute([$usatoVal,$id]);
+    }
+    
+    /*
+    $stmt = $dbo->prepare($query);
+    $stmt->bindParam(':ur',$id);
+    $stmt->bindParam(':us',$usatoVal);
+    $stmt->execute();
+    */
+
+    // Controllo che non sia fallita la procedura
+    if($stmt !== null && $stmt->rowCount() == 0 ) {
+        $res = $stmt->errorInfo();
+        echo "<pre>ID: $id<br>USATO: $usatoVal<br>";
+        var_dump($stmt);
+        var_dump($res); die;
+    }
+} // fine setUsato()

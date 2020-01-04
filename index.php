@@ -115,36 +115,65 @@ else {
 	<?php
 
 	// Aggiorna la pagina piu volte (responso più attendibile / più lento <- trovare altro sistema)
-	while($_SESSION['count'] < 3) {
+	
+	while($_SESSION['count'] < 2) {
 		// ricarico la pagina
 		header("Location: index.php");
 		$_SESSION['count']++;	
 	}
 	
-
 	//var_dump($_SESSION);
 	//echo count($_SESSION['n_usato']);
 
 	$n_usato = 0;
-	$titoli = [];
+	
 
-	if(isset($_SESSION['titoli'])) {
-		$titoli = $_SESSION['titoli'];
-		$n_usato = count($_SESSION['titoli']);
-		$_SESSION['titoli'] = [];
-	}
+	// Cerco usato nella tabella USED
 
+	// QUERY --> 
+	$stmt = null; // resetto lo statement
+
+	// prelevo gli URL-ID che siano anche usati
+	$query = "SELECT r.urlid FROM a4l_rels as r JOIN a4l_used as us ON r.urlid = us.urlid WHERE r.userid = ? AND us.usato = 1";
+
+	// Altra join (non efficace)
+	//$query = "SELECT u.furl, u.titolo FROM a4l_urls as u JOIN a4l_used as us ON u.nurl = us.urlid WHERE us.usato = 1;";
+
+	$stmt = $dbo->prepare($query);
+	$stmt->execute([$userid]);
+
+	$idUsed = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	
+
+	$n_usato = count($idUsed);
+	
 	//$color = 'blue';
 	$color = ($n_usato > 0) ? 'green' : 'red';
 	
 	
 	echo "<h3>Usati disponibili: <span style=\"color: $color ;\" >".$n_usato."</span></h3>";
 
+	//var_dump($idUsed); die;
+	$stmt = null;
+
 	if($n_usato > 0) {
 		echo "<b><u>Titoli Usati in Evidenza:</u></b> <br><ul>";
 
-		foreach($titoli as $titolo) {
-			echo '<li><a href="'.current($titolo).'" target="_blank">'.key($titolo).' </a></li>';
+		$query = "SELECT * FROM a4l_urls WHERE nurl = ?";
+		$stmt = $dbo->prepare($query);
+		
+		foreach($idUsed as $iu) {
+			$stmt->execute([$iu['urlid']]);
+			$uData[] = $stmt->fetch(PDO::FETCH_ASSOC);
+		}
+				
+		//echo "<pre>";var_dump($uData); die;
+
+		foreach($uData as $ud) {
+
+			$udFurl = ($ud['furl'] != '') ? $ud['furl'] : '<span style="color:red">TITOLO NON DISPONIBILE (Ricarica la pagina)</span>';
+
+			echo '<li><a href="'.$ud['furl'].'" target="_blank">'.$ud['titolo'].' </a></li>';
 		}
 
 		echo "</ul>";
@@ -180,19 +209,19 @@ else {
 
 		if($url['cat'] == 'normal') {
 			//echo $url['nurl'].") entrato in normak<br>";
-			$resultNormal[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
+			$resultNormal[] = findOccurrence($url['furl'],$url['nurl'],$url['cat'],$dbo);
 		}
 		if($url['cat'] == 'prior') {
 			//echo $url['nurl'].") entrato in prior<br>";
-			$resultPrior[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
+			$resultPrior[] = findOccurrence($url['furl'],$url['nurl'],$url['cat'],$dbo);
 		}
 		if($url['cat'] == 'curios') {
 			//echo $url['nurl'].") entrato in curios<br>";
-			$resultCurios[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
+			$resultCurios[] = findOccurrence($url['furl'],$url['nurl'],$url['cat'],$dbo);
 		}
 		if($url['cat'] == 'personal') {
 			//echo $url['nurl'].") entrato in pers<br>";
-			$resultPersonal[] = findOccurrence($url['furl'],$url['nurl'],$url['cat']);
+			$resultPersonal[] = findOccurrence($url['furl'],$url['nurl'],$url['cat'],$dbo);
 		}
 		
 	} // fine foreach urls

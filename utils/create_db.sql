@@ -16,7 +16,7 @@ USE my_fuzzlernet;
 CREATE TABLE IF NOT EXISTS a4l_urls (
     nurl INT(10) AUTO_INCREMENT PRIMARY KEY,
     furl TEXT(255) NOT NULL,
-    cat VARCHAR(15)
+    titolo TEXT(255)
 ) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS a4l_users (
@@ -32,7 +32,16 @@ CREATE TABLE IF NOT EXISTS a4l_rels (
     idrel INT(20) AUTO_INCREMENT PRIMARY KEY,
     userid INT(10),
     urlid INT(10),
+    cat VARCHAR(15),
     FOREIGN KEY (userid) REFERENCES a4l_users(id),
+    FOREIGN KEY (urlid) REFERENCES a4l_urls(nurl)
+) ENGINE=INNODB;
+
+--TABELLA CON LA LISTA DEGLI USATI
+CREATE TABLE IF NOT EXISTS a4l_used (
+    id INT(10) AUTO_INCREMENT PRIMARY KEY,
+    urlid INT(10) NOT NULL,
+    usato TINYINT(1),
     FOREIGN KEY (urlid) REFERENCES a4l_urls(nurl)
 ) ENGINE=INNODB;
 
